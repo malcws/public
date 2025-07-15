@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NECBL Game Weather Forecast Tool</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #2c5530, #4a7c59);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #4a7c59;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2c5530, #4a7c59);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #1e3b22, #3a5f47);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin: 20px 0;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 15px;
+            border-radius: 5px;
+            color: #a00;
+            margin: 20px 0;
+        }
+
+        .forecast-report {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .forecast-header {
+            border-bottom: 2px solid #4a7c59;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .forecast-header h2 {
+            margin: 0;
+            color: #2c5530;
+            text-align: center;
+        }
+
+        .forecast-meta {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .recommendation {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .recommendation.play {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .recommendation.caution {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .recommendation.do-not-play {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .hourly-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .hourly-table th {
+            background: #4a7c59;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .hourly-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .hourly-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .precipitation-summary {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .precipitation-summary h3 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .hourly-table {
+                font-size: 12px;
+            }
+
+            .hourly-table th,
+            .hourly-table td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚾ NECBL GAME WEATHER FORECAST TOOL ⚾</h1>
+        <p>Get 5-hour precipitation forecasts for NECBL game decision making<br>through the National Weather Service hourly forecast. For day-of only.</p>
+    </div>
+
+    <div class="form-container">
+        <div class="form-group">
+            <label for="citySelect">Select Game Location:</label>
+            <select id="citySelect">
+                <option value="">Choose a NECBL team...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="gameTime">Game Start Time:</label>
+            <input type="text" id="gameTime" placeholder="e.g., 4:30 PM, 5 PM, 17:00" />
+        </div>
+
+        <button id="getForecast" onclick="getForecast()">Get Weather Forecast</button>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">
+        Fetching weather data from National Weather Service...
+    </div>
+
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="forecastReport" class="forecast-report" style="display: none;"></div>
+
+    <script>
+        class NECBLWeatherForecast {
+            constructor() {
+                this.baseUrl = 'https://api.weather.gov';
+
+                // Predefined coordinates and NECBL teams for the cities
+                this.cities = {
+                    "Bristol, Connecticut": {
+                        coordinates: [41.6718, -72.9493],
+                        team: "Bristol Blues"
+                    },
+                    "Danbury, Connecticut": {
+                        coordinates: [41.3948, -73.4540],
+                        team: "Danbury Westerners"
+                    },
+                    "Mystic, Connecticut": {
+                        coordinates: [41.3543, -71.9662],
+                        team: "Mystic Schooners"
+                    },
+                    "Keene, New Hampshire": {
+                        coordinates: [42.9342, -72.2815],
+                        team: "Keene SwampBats"
+                    },
+                    "Sanford, Maine": {
+                        coordinates: [43.4393, -70.7740],
+                        team: "Sanford Mainers"
+                    },
+                    "North Adams, Massachusetts": {
+                        coordinates: [42.7001, -73.1084],
+                        team: "North Adams SteepleCats"
+                    },
+                    "Lynn, Massachusetts": {
+                        coordinates: [42.4668, -70.9495],
+                        team: "Lynn Sailors"
+                    },
+                    "Holyoke, Massachusetts": {
+                        coordinates: [42.2043, -72.6162],
+                        team: "Holyoke Blue Sox"
+                    },
+                    "Oak Bluffs (Martha's Vineyard), Massachusetts": {
+                        coordinates: [41.4551, -70.5642],
+                        team: "Martha's Vineyard Sharks"
+                    },
+                    "South Kingstown, Rhode Island": {
+                        coordinates: [41.4432, -71.5226],
+                        team: "Ocean State Waves"
+                    },
+                    "Newport, Rhode Island": {
+                        coordinates: [41.4901, -71.3128],
+                        team: "Newport Gulls"
+                    },
+                    "White River Junction, Vermont": {
+                        coordinates: [43.6489, -72.3195],
+                        team: "Upper Valley Nighthawks"
+                    },
+                    "Montpelier, Vermont": {
+                        coordinates: [44.2601, -72.5806],
+                        team: "Vermont Mountaineers"
+                    }
+                };
+
+                this.populateCitySelect();
+            }
+
+            populateCitySelect() {
+                const select = document.getElementById('citySelect');
+                Object.keys(this.cities).forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = `${this.cities[city].team} (${city})`;
+                    select.appendChild(option);
+                });
+            }
+
+            async makeRequest(url) {
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'NECBL Weather Forecast Tool (contact@example.com)',
+                        'Accept': 'application/geo+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            }
+
+            async getWeatherOfficeAndGrid(lat, lon) {
+                try {
+                    const url = `${this.baseUrl}/points/${lat},${lon}`;
+                    const data = await this.makeRequest(url);
+                    const properties = data.properties || {};
+
+                    const forecastOffice = properties.cwa;
+                    const gridX = properties.gridX;
+                    const gridY = properties.gridY;
+
+                    if (forecastOffice && gridX && gridY) {
+                        return { office: forecastOffice, gridX, gridY };
+                    }
+                    return null;
+                } catch (error) {
+                    console.error(`Error getting grid info: ${error.message}`);
+                    return null;
+                }
+            }
+
+            async getHourlyForecast(office, gridX, gridY) {
+                try {
+                    // Get hourly forecast
+                    const hourlyUrl = `${this.baseUrl}/gridpoints/${office}/${gridX},${gridY}/forecast/hourly`;
+                    const hourlyData = await this.makeRequest(hourlyUrl);
+                    const periods = hourlyData.properties?.periods || [];
+                    const forecastMetadata = hourlyData.properties || {};
+
+                    // Get quantitative precipitation forecast (QPF)
+                    const qpfUrl = `${this.baseUrl}/gridpoints/${office}/${gridX},${gridY}`;
+                    const qpfData = await this.makeRequest(qpfUrl);
+                    const qpfProperties = qpfData.properties || {};
+
+                    return { periods, qpfProperties, forecastMetadata };
+                } catch (error) {
+                    console.error(`Error getting hourly forecast: ${error.message}`);
+                    return null;
+                }
+            }
+
+            parseGameTime(timeInput) {
+                try {
+                    timeInput = timeInput.trim().toUpperCase();
+
+                    let hour = 0, minute = 0;
+
+                    if (timeInput.includes('PM') || timeInput.includes('AM')) {
+                        const isPM = timeInput.includes('PM');
+                        const timeStr = timeInput.replace(/[AP]M/g, '').trim();
+
+                        if (timeStr.includes(':')) {
+                            const [h, m] = timeStr.split(':');
+                            hour = parseInt(h);
+                            minute = parseInt(m);
+                        } else {
+                            hour = parseInt(timeStr);
+                        }
+
+                        if (isPM && hour !== 12) hour += 12;
+                        if (!isPM && hour === 12) hour = 0;
+                    } else {
+                        if (timeInput.includes(':')) {
+                            const [h, m] = timeInput.split(':');
+                            hour = parseInt(h);
+                            minute = parseInt(m);
+                        } else {
+                            hour = parseInt(timeInput);
+                        }
+                    }
+
+                    const today = new Date();
+                    const gameTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, minute);
+
+                    return gameTime;
+                } catch (error) {
+                    console.error(`Error parsing time: ${error.message}`);
+                    return null;
+                }
+            }
+
+            findForecastPeriods(periods, qpfData, startTime, hours = 5) {
+                const matchingPeriods = [];
+                const qpfValues = qpfData.quantitativePrecipitation?.values || [];
+
+                for (const period of periods) {
+                    const periodStart = new Date(period.startTime);
+                    const periodEnd = new Date(period.endTime);
+
+                    const periodStartLocal = new Date(periodStart.getTime() - (4 * 60 * 60 * 1000));
+                    const periodEndLocal = new Date(periodEnd.getTime() - (4 * 60 * 60 * 1000));
+
+                    const gameEnd = new Date(startTime.getTime() + (hours * 60 * 60 * 1000));
+
+                    if (periodStartLocal <= gameEnd && periodEndLocal >= startTime) {
+                        const precipAmount = this.getPrecipitationAmount(qpfValues, periodStart, periodEnd);
+
+                        matchingPeriods.push({
+                            period,
+                            localStart: periodStartLocal,
+                            localEnd: periodEndLocal,
+                            precipitationAmount: precipAmount
+                        });
+                    }
+                }
+
+                return matchingPeriods.slice(0, hours);
+            }
+
+            getPrecipitationAmount(qpfValues, periodStart, periodEnd) {
+                let totalPrecip = 0.0;
+
+                for (const qpfEntry of qpfValues) {
+                    const validTimeStr = qpfEntry.validTime || '';
+                    const qpfStart = new Date(validTimeStr.split('/')[0]);
+
+                    let hoursDuration = 1;
+                    const durationStr = validTimeStr.split('/')[1] || 'PT1H';
+                    if (durationStr.startsWith('PT') && durationStr.endsWith('H')) {
+                        hoursDuration = parseInt(durationStr.substring(2, durationStr.length - 1));
+                    }
+                    const qpfEnd = new Date(qpfStart.getTime() + (hoursDuration * 60 * 60 * 1000));
+
+                    if (qpfStart < periodEnd && qpfEnd > periodStart) {
+                        const value = qpfEntry.value;
+                        if (value !== null && value !== undefined) {
+                            const precipInches = value * 0.0393701;
+                            totalPrecip += precipInches;
+                        }
+                    }
+                }
+
+                return Math.round(totalPrecip * 100) / 100;
+            }
+
+            assessPlayability(periods) {
+                if (!periods || periods.length === 0) {
+                    return { recommendation: 'UNKNOWN', reason: 'No forecast data available' };
+                }
+
+                let maxPrecipProb = 0;
+                let totalPrecipAmount = 0.0;
+                const tempRange = [];
+                const windConcerns = [];
+
+                for (const periodData of periods) {
+                    const period = periodData.period;
+                    const precipAmount = periodData.precipitationAmount || 0.0;
+
+                    const precipProb = period.probabilityOfPrecipitation?.value || 0;
+                    maxPrecipProb = Math.max(maxPrecipProb, precipProb);
+
+                    totalPrecipAmount += precipAmount;
+
+                    const temp = period.temperature || 0;
+                    tempRange.push(temp);
+
+                    const windSpeed = period.windSpeed || '0 mph';
+                    const windMatch = windSpeed.match(/(\d+)/);
+                    if (windMatch) {
+                        const windMph = parseInt(windMatch[1]);
+                        if (windMph > 15) {
+                            windConcerns.push(`${windMph} mph`);
+                        }
+                    }
+                }
+
+                let recommendation, reason;
+
+                if (maxPrecipProb >= 70 || totalPrecipAmount >= 0.25) {
+                    recommendation = 'DO NOT PLAY';
+                    if (totalPrecipAmount >= 0.25) {
+                        reason = `Heavy precipitation expected (${totalPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
+                    } else {
+                        reason = `High precipitation probability (${maxPrecipProb}%)`;
+                    }
+                } else if (maxPrecipProb >= 40 || totalPrecipAmount >= 0.10) {
+                    recommendation = 'CAUTION';
+                    if (totalPrecipAmount >= 0.10) {
+                        reason = `Moderate precipitation expected (${totalPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
+                    } else {
+                        reason = `Moderate precipitation probability (${maxPrecipProb}%)`;
+                    }
+                } else if (windConcerns.length > 0) {
+                    recommendation = 'CAUTION';
+                    reason = `High winds expected: ${windConcerns.join(', ')}`;
+                } else {
+                    recommendation = 'PLAY';
+                    if (totalPrecipAmount > 0) {
+                        reason = `Low precipitation risk (${maxPrecipProb}%, ${totalPrecipAmount.toFixed(2)}" expected)`;
+                    } else {
+                        reason = `Low precipitation risk (${maxPrecipProb}%)`;
+                    }
+                }
+
+                return {
+                    recommendation,
+                    reason,
+                    maxPrecipProbability: maxPrecipProb,
+                    totalPrecipAmount,
+                    temperatureRange: tempRange.length > 0 ? [Math.min(...tempRange), Math.max(...tempRange)] : [0, 0]
+                };
+            }
+
+            formatDateTime(date) {
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+
+                const dayName = days[date.getDay()];
+                const monthName = months[date.getMonth()];
+                const day = date.getDate();
+                const year = date.getFullYear();
+                const time = this.formatTime(date);
+
+                return `${dayName}, ${monthName} ${day}, ${year} at ${time}`;
+            }
+
+            formatTime(date) {
+                let hours = date.getHours();
+                const minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+
+                hours = hours % 12;
+                if (hours === 0) hours = 12;
+
+                const minutesStr = minutes.toString().padStart(2, '0');
+                return `${hours}:${minutesStr} ${ampm}`;
+            }
+
+            displayForecastReport(city, team, gameTime, periods, assessment, forecastMetadata) {
+                const currentTime = new Date();
+                const reportDiv = document.getElementById('forecastReport');
+
+                let html = `
+                    <div class="forecast-header">
+                        <h2>NECBL GAME WEATHER FORECAST</h2>
+                    </div>
+
+                    <div class="forecast-meta">
+                        <strong>Report Generated:</strong> ${this.formatDateTime(currentTime)} EDT<br>
+                        <strong>Location:</strong> ${city}<br>
+                        <strong>Team:</strong> ${team}<br>
+                        <strong>Game Time:</strong> ${this.formatDateTime(gameTime)}<br>
+                        <strong>Forecast Period:</strong> ${this.formatTime(gameTime)} - ${this.formatTime(new Date(gameTime.getTime() + 5 * 60 * 60 * 1000))}
+                `;
+
+                if (forecastMetadata.updated) {
+                    try {
+                        const updatedDt = new Date(forecastMetadata.updated);
+                        const updatedLocal = new Date(updatedDt.getTime() - (4 * 60 * 60 * 1000));
+                        html += `<br><strong>Forecast Generated:</strong> ${this.formatDateTime(updatedLocal)} EDT`;
+                    } catch (error) {
+                        html += `<br><strong>Forecast Generated:</strong> ${forecastMetadata.updated}`;
+                    }
+                }
+
+                html += `</div>`;
+
+                const recClass = assessment.recommendation.toLowerCase().replace(/\s+/g, '-');
+                html += `
+                    <div class="recommendation ${recClass}">
+                        <div style="font-size: 1.2em;">RECOMMENDATION: ${assessment.recommendation}</div>
+                        <div>Reason: ${assessment.reason}</div>
+                `;
+
+                if (assessment.temperatureRange[0] > 0) {
+                    const [tempMin, tempMax] = assessment.temperatureRange;
+                    html += `<div>Temperature Range: ${tempMin}°F - ${tempMax}°F</div>`;
+                }
+
+                if (assessment.totalPrecipAmount > 0) {
+                    html += `<div>Total Precipitation Expected: ${assessment.totalPrecipAmount.toFixed(2)} inches</div>`;
+                }
+
+                html += `</div>`;
+
+                html += `
+                    <table class="hourly-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Temp</th>
+                                <th>Precip%</th>
+                                <th>Amount</th>
+                                <th>Wind</th>
+                                <th>Conditions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                for (const periodData of periods) {
+                    const period = periodData.period;
+                    const localStart = periodData.localStart;
+                    const precipAmount = periodData.precipitationAmount || 0.0;
+
+                    const temp = period.temperature || 'N/A';
+                    const precipProb = period.probabilityOfPrecipitation?.value || 0;
+                    const windSpeed = period.windSpeed || 'N/A';
+                    const windDir = period.windDirection || '';
+                    const conditions = period.shortForecast || 'N/A';
+
+                    const windDisplay = windDir ? `${windDir} ${windSpeed}` : windSpeed;
+                    const amountDisplay = precipAmount > 0 ? `${precipAmount.toFixed(2)}"` : '0.00"';
+
+                    html += `
+                        <tr>
+                            <td>${this.formatTime(localStart)}</td>
+                            <td>${temp}°F</td>
+                            <td>${precipProb}%</td>
+                            <td>${amountDisplay}</td>
+                            <td>${windDisplay}</td>
+                            <td>${conditions}</td>
+                        </tr>
+                    `;
+                }
+
+                html += `</tbody></table>`;
+
+                if (assessment.totalPrecipAmount > 0) {
+                    html += `<div class="precipitation-summary">`;
+                    html += `<h3>PRECIPITATION SUMMARY</h3>`;
+                    if (assessment.totalPrecipAmount >= 0.25) {
+                        html += `🌧️ Heavy rain expected: ${assessment.totalPrecipAmount.toFixed(2)}" total`;
+                    } else if (assessment.totalPrecipAmount >= 0.10) {
+                        html += `🌦️ Moderate rain expected: ${assessment.totalPrecipAmount.toFixed(2)}" total`;
+                    } else {
+                        html += `🌤️ Light precipitation possible: ${assessment.totalPrecipAmount.toFixed(2)}" total`;
+                    }
+                    html += `</div>`;
+                }
+
+                reportDiv.innerHTML = html;
+                reportDiv.style.display = 'block';
+            }
+
+            async getForecastForGame(city, gameTime) {
+                if (!(city in this.cities)) {
+                    throw new Error(`City '${city}' not found in available locations`);
+                }
+
+                const cityData = this.cities[city];
+                const [lat, lon] = cityData.coordinates;
+
+                const gridInfo = await this.getWeatherOfficeAndGrid(lat, lon);
+                if (!gridInfo) {
+                    throw new Error(`Could not get grid information for ${city}`);
+                }
+
+                const { office, gridX, gridY } = gridInfo;
+
+                const forecastData = await this.getHourlyForecast(office, gridX, gridY);
+                if (!forecastData) {
+                    throw new Error(`Could not get hourly forecast for ${city}`);
+                }
+
+                const { periods, qpfProperties, forecastMetadata } = forecastData;
+
+                const matchingPeriods = this.findForecastPeriods(periods, qpfProperties, gameTime);
+                if (matchingPeriods.length === 0) {
+                    throw new Error(`Could not find forecast periods for game time in ${city}`);
+                }
+
+                const assessment = this.assessPlayability(matchingPeriods);
+
+                return {
+                    city,
+                    team: cityData.team,
+                    gameTime,
+                    periods: matchingPeriods,
+                    assessment,
+                    forecastMetadata
+                };
+            }
+        }
+
+        // Global instance
+        const weatherApp = new NECBLWeatherForecast();
+
+        async function getForecast() {
+            const citySelect = document.getElementById('citySelect');
+            const gameTimeInput = document.getElementById('gameTime');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const reportDiv = document.getElementById('forecastReport');
+            const button = document.getElementById('getForecast');
+
+            // Clear previous results
+            errorDiv.style.display = 'none';
+            reportDiv.style.display = 'none';
+
+            // Validate inputs
+            if (!citySelect.value) {
+                showError('Please select a game location.');
+                return;
+            }
+
+            if (!gameTimeInput.value.trim()) {
+                showError('Please enter a game start time.');
+                return;
+            }
+
+            const gameTime = weatherApp.parseGameTime(gameTimeInput.value);
+            if (!gameTime) {
+                showError('Invalid time format. Please use formats like "4:30 PM", "5 PM", or "17:00".');
+                return;
+            }
+
+            // Show loading state
+            loadingDiv.style.display = 'block';
+            button.disabled = true;
+
+            try {
+                const forecastData = await weatherApp.getForecastForGame(citySelect.value, gameTime);
+
+                weatherApp.displayForecastReport(
+                    forecastData.city,
+                    forecastData.team,
+                    forecastData.gameTime,
+                    forecastData.periods,
+                    forecastData.assessment,
+                    forecastData.forecastMetadata
+                );
+
+            } catch (error) {
+                showError(`Failed to retrieve forecast data: ${error.message}`);
+            } finally {
+                loadingDiv.style.display = 'none';
+                button.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('gameTime').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getForecast();
+            }
+        });
+    </script>
+</body>
+</html>
