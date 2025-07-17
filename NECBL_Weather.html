@@ -499,14 +499,14 @@
                 if (maxPrecipProb >= 70 || maxPrecipAmount >= 0.25) {
                     recommendation = 'DO NOT PLAY';
                     if (maxPrecipAmount >= 0.25) {
-                        reason = `Heavy precipitation expected (${maxPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
+                        reason = `Heavy precipitation expected (${maxPrecipAmount.toFixed(2)}" max hour, ${maxPrecipProb}% probability)`;
                     } else {
                         reason = `High precipitation probability (${maxPrecipProb}%)`;
                     }
                 } else if (maxPrecipProb >= 40 || maxPrecipAmount >= 0.10) {
                     recommendation = 'CAUTION';
                     if (maxPrecipAmount >= 0.10) {
-                        reason = `Moderate precipitation expected (${maxPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
+                        reason = `Moderate precipitation expected (${maxPrecipAmount.toFixed(2)}" max hour, ${maxPrecipProb}% probability)`;
                     } else {
                         reason = `Moderate precipitation probability (${maxPrecipProb}%)`;
                     }
@@ -651,11 +651,11 @@
                     html += `<div class="precipitation-summary">`;
                     html += `<h3>PRECIPITATION SUMMARY</h3>`;
                     if (assessment.maxPrecipAmount >= 0.25) {
-                        html += `🌧️ Heavy rain expected: ${assessment.maxPrecipAmount.toFixed(2)}" total`;
+                        html += `🌧️ Heavy rain expected: ${assessment.maxPrecipAmount.toFixed(2)}" max hr`;
                     } else if (assessment.maxPrecipAmount >= 0.10) {
-                        html += `🌦️ Moderate rain expected: ${assessment.maxPrecipAmount.toFixed(2)}" total`;
+                        html += `🌦️ Moderate rain expected: ${assessment.maxPrecipAmount.toFixed(2)}" max hr`;
                     } else {
-                        html += `🌤️ Light precipitation possible: ${assessment.maxPrecipAmount.toFixed(2)}" total`;
+                        html += `🌤️ Light precipitation possible: ${assessment.maxPrecipAmount.toFixed(2)}" max hr`;
                     }
                     html += `</div>`;
                 }
