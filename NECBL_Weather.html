@@ -497,7 +497,7 @@
                 let recommendation, reason;
 
                 if (maxPrecipProb >= 70 || maxPrecipAmount >= 0.25) {
-                    recommendation = 'DO NOT PLAY';
+                    recommendation = 'UNLIKELY TO PLAY';
                     if (maxPrecipAmount >= 0.25) {
                         reason = `Heavy precipitation expected (${maxPrecipAmount.toFixed(2)}" max hour, ${maxPrecipProb}% probability)`;
                     } else {
@@ -596,10 +596,6 @@
                 if (assessment.temperatureRange[0] > 0) {
                     const [tempMin, tempMax] = assessment.temperatureRange;
                     html += `<div>Temperature Range: ${tempMin}°F - ${tempMax}°F</div>`;
-                }
-
-                if (assessment.maxPrecipAmount > 0) {
-                    html += `<div>Max Hour Precipitation Expected: ${assessment.maxPrecipAmount.toFixed(2)} inches</div>`;
                 }
 
                 html += `</div>`;
