@@ -510,9 +510,6 @@
                     } else {
                         reason = `Moderate precipitation probability (${maxPrecipProb}%)`;
                     }
-                } else if (windConcerns.length > 0) {
-                    recommendation = 'CAUTION';
-                    reason = `High winds expected: ${windConcerns.join(', ')}`;
                 } else {
                     recommendation = 'PLAY';
                     if (maxPrecipAmount > 0) {
@@ -589,7 +586,7 @@
                 const recClass = assessment.recommendation.toLowerCase().replace(/\s+/g, '-');
                 html += `
                     <div class="recommendation ${recClass}">
-                        <div style="font-size: 1.2em;">RECOMMENDATION: ${assessment.recommendation}</div>
+                        <div style="font-size: 1.2em;">ASSESSMENT: ${assessment.recommendation}</div>
                         <div>Reason: ${assessment.reason}</div>
                 `;
 
