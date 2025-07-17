@@ -150,7 +150,7 @@
             color: #856404;
         }
 
-        .recommendation.do-not-play {
+        .recommendation.rainout-likely {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
@@ -497,7 +497,7 @@
                 let recommendation, reason;
 
                 if (maxPrecipProb >= 70 || maxPrecipAmount >= 0.25) {
-                    recommendation = 'UNLIKELY TO PLAY';
+                    recommendation = 'RAINOUT LIKELY';
                     if (maxPrecipAmount >= 0.25) {
                         reason = `Heavy precipitation expected (${maxPrecipAmount.toFixed(2)}" max hour, ${maxPrecipProb}% probability)`;
                     } else {
