@@ -437,7 +437,7 @@
             }
 
             getPrecipitationAmount(qpfValues, periodStart, periodEnd) {
-                let totalPrecip = 0.0;
+                let maxPrecip = 0.0;
 
                 for (const qpfEntry of qpfValues) {
                     const validTimeStr = qpfEntry.validTime || '';
@@ -454,12 +454,12 @@
                         const value = qpfEntry.value;
                         if (value !== null && value !== undefined) {
                             const precipInches = value * 0.0393701;
-                            totalPrecip += precipInches;
+                            maxPrecip = Math.max(maxPrecip,precipInches);
                         }
                     }
                 }
 
-                return Math.round(totalPrecip * 100) / 100;
+                return Math.round(maxPrecip * 100) / 100;
             }
 
             assessPlayability(periods) {
@@ -468,7 +468,7 @@
                 }
 
                 let maxPrecipProb = 0;
-                let totalPrecipAmount = 0.0;
+                let maxPrecipAmount = 0.0;
                 const tempRange = [];
                 const windConcerns = [];
 
@@ -479,7 +479,7 @@
                     const precipProb = period.probabilityOfPrecipitation?.value || 0;
                     maxPrecipProb = Math.max(maxPrecipProb, precipProb);
 
-                    totalPrecipAmount += precipAmount;
+                    maxPrecipAmount = Math.max(precipAmount, maxPrecipAmount);
 
                     const temp = period.temperature || 0;
                     tempRange.push(temp);
@@ -496,17 +496,17 @@
 
                 let recommendation, reason;
 
-                if (maxPrecipProb >= 70 || totalPrecipAmount >= 0.25) {
+                if (maxPrecipProb >= 70 || maxPrecipAmount >= 0.25) {
                     recommendation = 'DO NOT PLAY';
-                    if (totalPrecipAmount >= 0.25) {
-                        reason = `Heavy precipitation expected (${totalPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
+                    if (maxPrecipAmount >= 0.25) {
+                        reason = `Heavy precipitation expected (${maxPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
                     } else {
                         reason = `High precipitation probability (${maxPrecipProb}%)`;
                     }
-                } else if (maxPrecipProb >= 40 || totalPrecipAmount >= 0.10) {
+                } else if (maxPrecipProb >= 40 || maxPrecipAmount >= 0.10) {
                     recommendation = 'CAUTION';
-                    if (totalPrecipAmount >= 0.10) {
-                        reason = `Moderate precipitation expected (${totalPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
+                    if (maxPrecipAmount >= 0.10) {
+                        reason = `Moderate precipitation expected (${maxPrecipAmount.toFixed(2)}" total, ${maxPrecipProb}% probability)`;
                     } else {
                         reason = `Moderate precipitation probability (${maxPrecipProb}%)`;
                     }
@@ -515,8 +515,8 @@
                     reason = `High winds expected: ${windConcerns.join(', ')}`;
                 } else {
                     recommendation = 'PLAY';
-                    if (totalPrecipAmount > 0) {
-                        reason = `Low precipitation risk (${maxPrecipProb}%, ${totalPrecipAmount.toFixed(2)}" expected)`;
+                    if (maxPrecipAmount > 0) {
+                        reason = `Low precipitation risk (${maxPrecipProb}%, ${maxPrecipAmount.toFixed(2)}" expected)`;
                     } else {
                         reason = `Low precipitation risk (${maxPrecipProb}%)`;
                     }
@@ -526,7 +526,7 @@
                     recommendation,
                     reason,
                     maxPrecipProbability: maxPrecipProb,
-                    totalPrecipAmount,
+                    maxPrecipAmount,
                     temperatureRange: tempRange.length > 0 ? [Math.min(...tempRange), Math.max(...tempRange)] : [0, 0]
                 };
             }
@@ -598,8 +598,8 @@
                     html += `<div>Temperature Range: ${tempMin}°F - ${tempMax}°F</div>`;
                 }
 
-                if (assessment.totalPrecipAmount > 0) {
-                    html += `<div>Total Precipitation Expected: ${assessment.totalPrecipAmount.toFixed(2)} inches</div>`;
+                if (assessment.maxPrecipAmount > 0) {
+                    html += `<div>Max Hour Precipitation Expected: ${assessment.maxPrecipAmount.toFixed(2)} inches</div>`;
                 }
 
                 html += `</div>`;
@@ -647,15 +647,15 @@
 
                 html += `</tbody></table>`;
 
-                if (assessment.totalPrecipAmount > 0) {
+                if (assessment.maxPrecipAmount > 0) {
                     html += `<div class="precipitation-summary">`;
                     html += `<h3>PRECIPITATION SUMMARY</h3>`;
-                    if (assessment.totalPrecipAmount >= 0.25) {
-                        html += `🌧️ Heavy rain expected: ${assessment.totalPrecipAmount.toFixed(2)}" total`;
-                    } else if (assessment.totalPrecipAmount >= 0.10) {
-                        html += `🌦️ Moderate rain expected: ${assessment.totalPrecipAmount.toFixed(2)}" total`;
+                    if (assessment.maxPrecipAmount >= 0.25) {
+                        html += `🌧️ Heavy rain expected: ${assessment.maxPrecipAmount.toFixed(2)}" total`;
+                    } else if (assessment.maxPrecipAmount >= 0.10) {
+                        html += `🌦️ Moderate rain expected: ${assessment.maxPrecipAmount.toFixed(2)}" total`;
                     } else {
-                        html += `🌤️ Light precipitation possible: ${assessment.totalPrecipAmount.toFixed(2)}" total`;
+                        html += `🌤️ Light precipitation possible: ${assessment.maxPrecipAmount.toFixed(2)}" total`;
                     }
                     html += `</div>`;
                 }
