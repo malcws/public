@@ -138,7 +138,7 @@
             text-align: center;
         }
 
-        .recommendation.play {
+        .recommendation.good {
             background: #d4edda;
             border: 1px solid #c3e6cb;
             color: #155724;
@@ -150,7 +150,7 @@
             color: #856404;
         }
 
-        .recommendation.rainout-likely {
+        .recommendation.poor {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
             color: #721c24;
@@ -497,7 +497,7 @@
                 let recommendation, reason;
 
                 if (maxPrecipProb >= 70 || maxPrecipAmount >= 0.25) {
-                    recommendation = 'RAINOUT LIKELY';
+                    recommendation = 'POOR';
                     if (maxPrecipAmount >= 0.25) {
                         reason = `Heavy precipitation expected (${maxPrecipAmount.toFixed(2)}" max hour, ${maxPrecipProb}% probability)`;
                     } else {
@@ -511,7 +511,7 @@
                         reason = `Moderate precipitation probability (${maxPrecipProb}%)`;
                     }
                 } else {
-                    recommendation = 'PLAY';
+                    recommendation = 'GOOD';
                     if (maxPrecipAmount > 0) {
                         reason = `Low precipitation risk (${maxPrecipProb}%, ${maxPrecipAmount.toFixed(2)}" expected)`;
                     } else {
@@ -586,7 +586,7 @@
                 const recClass = assessment.recommendation.toLowerCase().replace(/\s+/g, '-');
                 html += `
                     <div class="recommendation ${recClass}">
-                        <div style="font-size: 1.2em;">ASSESSMENT: ${assessment.recommendation}</div>
+                        <div style="font-size: 1.2em;">PLAYABILITY    : ${assessment.recommendation}</div>
                         <div>Reason: ${assessment.reason}</div>
                 `;
 
