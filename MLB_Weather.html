@@ -239,6 +239,39 @@
             font-weight: 500;
         }
 
+        .game-status {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: 2px solid;
+        }
+
+        .status-play {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .status-delay {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .status-postpone {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .status-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
         .conditions-cell {
             font-weight: 500;
             color: #2c3e50;
@@ -468,12 +501,34 @@
                 return;
             }
 
+            // Analyze game status
+            const gameStatus = analyzeGameStatus(periods, gameDateTime);
+            
+            // Status icons and styling
+            const statusConfig = {
+                play: { icon: '✅', class: 'status-play' },
+                delay: { icon: '⚠️', class: 'status-delay' },
+                postpone: { icon: '❌', class: 'status-postpone' },
+                unknown: { icon: '❓', class: 'status-delay' }
+            };
+
+            const config = statusConfig[gameStatus.status] || statusConfig.unknown;
+
             let forecastHTML = `
                 <div class="forecast-container">
                     <div class="forecast-header">
                         <h2>${location.name} - ${location.stadium}</h2>
                         <p>Game Time: ${gameDateTime.toLocaleString()}</p>
                     </div>
+                    
+                    <div class="game-status ${config.class}">
+                        <div>
+                            <span class="status-icon">${config.icon}</span>
+                            ${gameStatus.message}
+                        </div>
+                        <div class="status-details">${gameStatus.details}</div>
+                    </div>
+                    
                     <div class="forecast-table-container">
                         <table class="forecast-table">
                             <thead>
@@ -536,6 +591,100 @@
                 getForecast();
             }
         });
+
+        function analyzeGameStatus(periods, gameDateTime) {
+            if (!periods || periods.length === 0) {
+                return { status: 'unknown', message: 'Unable to determine game status - no weather data available', details: '' };
+            }
+
+            let maxPrecipProb = 0;
+            let totalPrecipAmount = 0;
+            let hasThunderstorms = false;
+            let minTemp = 999;
+            let maxTemp = -999;
+            let gameStartConditions = null;
+
+            // Analyze weather conditions
+            periods.forEach((period, index) => {
+                const periodTime = new Date(period.startTime);
+                const precipProb = period.probabilityOfPrecipitation?.value || 0;
+                const precipAmount = period.quantitativePrecipitation?.value || 0;
+                const temp = period.temperature;
+                
+                maxPrecipProb = Math.max(maxPrecipProb, precipProb);
+                totalPrecipAmount += precipAmount;
+                minTemp = Math.min(minTemp, temp);
+                maxTemp = Math.max(maxTemp, temp);
+                
+                // Check for thunderstorms
+                if (period.shortForecast.toLowerCase().includes('thunder') || 
+                    period.shortForecast.toLowerCase().includes('storm')) {
+                    hasThunderstorms = true;
+                }
+                
+                // Game start conditions (first 2 hours are most critical)
+                if (index < 2) {
+                    if (!gameStartConditions) {
+                        gameStartConditions = {
+                            precipProb: precipProb,
+                            precipAmount: precipAmount,
+                            conditions: period.shortForecast
+                        };
+                    } else {
+                        gameStartConditions.precipProb = Math.max(gameStartConditions.precipProb, precipProb);
+                        gameStartConditions.precipAmount += precipAmount;
+                    }
+                }
+            });
+
+            // Decision logic
+            let status, message, details;
+
+            // Automatic postponement conditions
+            if (hasThunderstorms) {
+                status = 'postpone';
+                message = 'Game will likely be postponed';
+                details = 'Thunderstorms present - MLB policy requires postponement for lightning safety';
+            }
+            else if (minTemp < 35) {
+                status = 'postpone';
+                message = 'Game will likely be postponed';
+                details = `Extremely cold conditions (${minTemp}°F) - player safety concern`;
+            }
+            else if (maxTemp > 100) {
+                status = 'postpone';
+                message = 'Game will likely be postponed';
+                details = `Extreme heat (${maxTemp}°F) - player safety concern`;
+            }
+            else if (maxPrecipProb > 70 && totalPrecipAmount > 0.1) {
+                status = 'postpone';
+                message = 'Game will likely be postponed';
+                details = `Heavy rain expected (${maxPrecipProb}% chance, ${totalPrecipAmount.toFixed(2)}" total)`;
+            }
+            // Possible delay conditions
+            else if (gameStartConditions.precipProb > 30 && gameStartConditions.precipAmount > 0.05) {
+                status = 'delay';
+                message = 'Game may be rain-delayed';
+                details = `Moderate rain possible at game start (${gameStartConditions.precipProb}% chance, ${gameStartConditions.precipAmount.toFixed(2)}" expected)`;
+            }
+            else if (maxPrecipProb > 50 && totalPrecipAmount > 0.05) {
+                status = 'delay';
+                message = 'Game may be rain-delayed';
+                details = `Rain likely during game (${maxPrecipProb}% chance, ${totalPrecipAmount.toFixed(2)}" total)`;
+            }
+            // Game will be played
+            else {
+                status = 'play';
+                message = 'Game will be played as scheduled';
+                if (maxPrecipProb > 0) {
+                    details = `Good conditions (${maxPrecipProb}% chance of rain, ${totalPrecipAmount.toFixed(2)}" expected)`;
+                } else {
+                    details = 'Clear conditions expected';
+                }
+            }
+
+            return { status, message, details };
+        }
     </script>
 </body>
 </html>
