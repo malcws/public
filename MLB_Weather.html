@@ -165,68 +165,85 @@
             opacity: 0.9;
         }
 
-        .forecast-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            padding: 20px;
+        .forecast-table-container {
+            padding: 0;
             background: white;
             border-radius: 0 0 15px 15px;
             border: 2px solid #e9ecef;
             border-top: none;
+            overflow-x: auto;
         }
 
-        .forecast-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #dee2e6;
-            transition: all 0.3s ease;
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
         }
 
-        .forecast-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .forecast-time {
-            font-weight: 700;
-            color: #2c3e50;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
+        .forecast-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
             text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .forecast-details {
-            display: grid;
-            gap: 8px;
-        }
-
-        .forecast-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-        }
-
-        .forecast-label {
             font-weight: 600;
-            color: #495057;
             font-size: 0.9rem;
+            border-bottom: 2px solid #5a6fd8;
         }
 
-        .forecast-value {
-            font-weight: 500;
+        .forecast-table th:first-child {
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        .forecast-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .forecast-table td:first-child {
+            text-align: left;
+            padding-left: 20px;
+            font-weight: 600;
             color: #2c3e50;
-            text-align: right;
+            background: #f8f9fa;
+            white-space: nowrap;
         }
 
-        .temperature {
-            font-size: 1.2rem;
+        .forecast-table tbody tr:hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .forecast-table tbody tr:nth-child(even) {
+            background: #fdfdfd;
+        }
+
+        .forecast-table tbody tr:nth-child(even):hover {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .temperature-cell {
             font-weight: 700;
             color: #e74c3c;
+            font-size: 1.1rem;
+        }
+
+        .precipitation-cell {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .wind-cell {
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        .conditions-cell {
+            font-weight: 500;
+            color: #2c3e50;
+            max-width: 120px;
+            word-wrap: break-word;
         }
 
         @media (max-width: 768px) {
@@ -457,13 +474,26 @@
                         <h2>${location.name} - ${location.stadium}</h2>
                         <p>Game Time: ${gameDateTime.toLocaleString()}</p>
                     </div>
-                    <div class="forecast-grid">
+                    <div class="forecast-table-container">
+                        <table class="forecast-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Temperature</th>
+                                    <th>Conditions</th>
+                                    <th>Precipitation</th>
+                                    <th>Precip Amount</th>
+                                    <th>Wind Speed</th>
+                                    <th>Wind Direction</th>
+                                </tr>
+                            </thead>
+                            <tbody>
             `;
 
             periods.forEach(period => {
                 const periodTime = new Date(period.startTime);
                 const timeString = periodTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const dateString = periodTime.toLocaleDateString();
+                const dateString = periodTime.toLocaleDateString([], {month: 'short', day: 'numeric'});
                 
                 // Parse wind direction and speed
                 const windMatch = period.windSpeed.match(/(\d+)\s*mph/);
@@ -475,42 +505,24 @@
                 const precipitationAmount = period.quantitativePrecipitation?.value || 0;
                 
                 forecastHTML += `
-                    <div class="forecast-card">
-                        <div class="forecast-time">
-                            ${timeString}<br>
-                            <small>${dateString}</small>
-                        </div>
-                        <div class="forecast-details">
-                            <div class="forecast-item">
-                                <span class="forecast-label">Temperature:</span>
-                                <span class="forecast-value temperature">${period.temperature}°${period.temperatureUnit}</span>
-                            </div>
-                            <div class="forecast-item">
-                                <span class="forecast-label">Conditions:</span>
-                                <span class="forecast-value">${period.shortForecast}</span>
-                            </div>
-                            <div class="forecast-item">
-                                <span class="forecast-label">Precipitation:</span>
-                                <span class="forecast-value">${precipitation}%</span>
-                            </div>
-                            <div class="forecast-item">
-                                <span class="forecast-label">Precip Amount:</span>
-                                <span class="forecast-value">${precipitationAmount > 0 ? precipitationAmount.toFixed(2) + ' in' : 'None'}</span>
-                            </div>
-                            <div class="forecast-item">
-                                <span class="forecast-label">Wind Speed:</span>
-                                <span class="forecast-value">${windSpeed}</span>
-                            </div>
-                            <div class="forecast-item">
-                                <span class="forecast-label">Wind Direction:</span>
-                                <span class="forecast-value">${windDirection}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <tr>
+                        <td>
+                            <strong>${timeString}</strong><br>
+                            <small style="color: #7f8c8d;">${dateString}</small>
+                        </td>
+                        <td class="temperature-cell">${period.temperature}°${period.temperatureUnit}</td>
+                        <td class="conditions-cell">${period.shortForecast}</td>
+                        <td class="precipitation-cell">${precipitation}%</td>
+                        <td class="precipitation-cell">${precipitationAmount > 0 ? precipitationAmount.toFixed(2) + ' in' : 'None'}</td>
+                        <td class="wind-cell">${windSpeed}</td>
+                        <td class="wind-cell">${windDirection}</td>
+                    </tr>
                 `;
             });
 
             forecastHTML += `
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             `;
