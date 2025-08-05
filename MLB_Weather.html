@@ -375,46 +375,46 @@
         // Team coordinates (stadiums)
         const teamLocations = {
             // American League East
-            orioles: { name: "Baltimore Orioles", lat: 39.2838, lon: -76.6211, stadium: "Oriole Park at Camden Yards" },
-            redsox: { name: "Boston Red Sox", lat: 42.3467, lon: -71.0972, stadium: "Fenway Park" },
-            yankees: { name: "New York Yankees", lat: 40.8296, lon: -73.9262, stadium: "Yankee Stadium" },
-            rays: { name: "Tampa Bay Rays", lat: 27.7682, lon: -82.6534, stadium: "Tropicana Field" },
-            bluejays: { name: "Toronto Blue Jays", lat: 43.6414, lon: -79.3894, stadium: "Rogers Centre" },
+            orioles: { name: "Baltimore Orioles", lat: 39.2838, lon: -76.6211, stadium: "Oriole Park at Camden Yards", indoor: false },
+            redsox: { name: "Boston Red Sox", lat: 42.3467, lon: -71.0972, stadium: "Fenway Park", indoor: false },
+            yankees: { name: "New York Yankees", lat: 40.8296, lon: -73.9262, stadium: "Yankee Stadium", indoor: false },
+            rays: { name: "Tampa Bay Rays", lat: 27.7682, lon: -82.6534, stadium: "Tropicana Field", indoor: false },
+            bluejays: { name: "Toronto Blue Jays", lat: 43.6414, lon: -79.3894, stadium: "Rogers Centre", indoor: true },
             
             // American League Central
-            whitesox: { name: "Chicago White Sox", lat: 41.8300, lon: -87.6338, stadium: "Guaranteed Rate Field" },
-            guardians: { name: "Cleveland Guardians", lat: 41.4958, lon: -81.6852, stadium: "Progressive Field" },
-            tigers: { name: "Detroit Tigers", lat: 42.3390, lon: -83.0485, stadium: "Comerica Park" },
-            royals: { name: "Kansas City Royals", lat: 39.0517, lon: -94.4803, stadium: "Kauffman Stadium" },
-            twins: { name: "Minnesota Twins", lat: 44.9817, lon: -93.2780, stadium: "Target Field" },
+            whitesox: { name: "Chicago White Sox", lat: 41.8300, lon: -87.6338, stadium: "Guaranteed Rate Field", indoor: false },
+            guardians: { name: "Cleveland Guardians", lat: 41.4958, lon: -81.6852, stadium: "Progressive Field", indoor: false },
+            tigers: { name: "Detroit Tigers", lat: 42.3390, lon: -83.0485, stadium: "Comerica Park", indoor: false },
+            royals: { name: "Kansas City Royals", lat: 39.0517, lon: -94.4803, stadium: "Kauffman Stadium", indoor: false },
+            twins: { name: "Minnesota Twins", lat: 44.9817, lon: -93.2780, stadium: "Target Field", indoor: false },
             
             // American League West
-            astros: { name: "Houston Astros", lat: 29.7570, lon: -95.3551, stadium: "Minute Maid Park" },
-            angels: { name: "Los Angeles Angels", lat: 33.8003, lon: -117.8827, stadium: "Angel Stadium" },
-            athletics: { name: "Oakland Athletics", lat: 37.7516, lon: -122.2005, stadium: "Oakland Coliseum" },
-            mariners: { name: "Seattle Mariners", lat: 47.5914, lon: -122.3326, stadium: "T-Mobile Park" },
-            rangers: { name: "Texas Rangers", lat: 32.7473, lon: -97.0832, stadium: "Globe Life Field" },
+            astros: { name: "Houston Astros", lat: 29.7570, lon: -95.3551, stadium: "Minute Maid Park", indoor: true },
+            angels: { name: "Los Angeles Angels", lat: 33.8003, lon: -117.8827, stadium: "Angel Stadium", indoor: false },
+            athletics: { name: "Oakland Athletics", lat: 37.7516, lon: -122.2005, stadium: "Oakland Coliseum", indoor: false },
+            mariners: { name: "Seattle Mariners", lat: 47.5914, lon: -122.3326, stadium: "T-Mobile Park", indoor: true },
+            rangers: { name: "Texas Rangers", lat: 32.7473, lon: -97.0832, stadium: "Globe Life Field", indoor: true },
             
             // National League East
-            braves: { name: "Atlanta Braves", lat: 33.8901, lon: -84.4677, stadium: "Truist Park" },
-            marlins: { name: "Miami Marlins", lat: 25.7781, lon: -80.2197, stadium: "loanDepot park" },
-            mets: { name: "New York Mets", lat: 40.7571, lon: -73.8458, stadium: "Citi Field" },
-            phillies: { name: "Philadelphia Phillies", lat: 39.9056, lon: -75.1664, stadium: "Citizens Bank Park" },
-            nationals: { name: "Washington Nationals", lat: 38.8730, lon: -77.0074, stadium: "Nationals Park" },
+            braves: { name: "Atlanta Braves", lat: 33.8901, lon: -84.4677, stadium: "Truist Park", indoor: false },
+            marlins: { name: "Miami Marlins", lat: 25.7781, lon: -80.2197, stadium: "loanDepot park", indoor: true },
+            mets: { name: "New York Mets", lat: 40.7571, lon: -73.8458, stadium: "Citi Field", indoor: false },
+            phillies: { name: "Philadelphia Phillies", lat: 39.9056, lon: -75.1664, stadium: "Citizens Bank Park", indoor: false },
+            nationals: { name: "Washington Nationals", lat: 38.8730, lon: -77.0074, stadium: "Nationals Park", indoor: false },
             
             // National League Central
-            cubs: { name: "Chicago Cubs", lat: 41.9484, lon: -87.6553, stadium: "Wrigley Field" },
-            reds: { name: "Cincinnati Reds", lat: 39.0979, lon: -84.5069, stadium: "Great American Ball Park" },
-            brewers: { name: "Milwaukee Brewers", lat: 43.0280, lon: -87.9712, stadium: "American Family Field" },
-            pirates: { name: "Pittsburgh Pirates", lat: 40.4469, lon: -79.9481, stadium: "PNC Park" },
-            cardinals: { name: "St. Louis Cardinals", lat: 38.6226, lon: -90.1928, stadium: "Busch Stadium" },
+            cubs: { name: "Chicago Cubs", lat: 41.9484, lon: -87.6553, stadium: "Wrigley Field", indoor: false },
+            reds: { name: "Cincinnati Reds", lat: 39.0979, lon: -84.5069, stadium: "Great American Ball Park", indoor: false },
+            brewers: { name: "Milwaukee Brewers", lat: 43.0280, lon: -87.9712, stadium: "American Family Field", indoor: true },
+            pirates: { name: "Pittsburgh Pirates", lat: 40.4469, lon: -79.9481, stadium: "PNC Park", indoor: false },
+            cardinals: { name: "St. Louis Cardinals", lat: 38.6226, lon: -90.1928, stadium: "Busch Stadium", indoor: false },
             
             // National League West
-            diamondbacks: { name: "Arizona Diamondbacks", lat: 33.4453, lon: -112.0667, stadium: "Chase Field" },
-            rockies: { name: "Colorado Rockies", lat: 39.7559, lon: -104.9942, stadium: "Coors Field" },
-            dodgers: { name: "Los Angeles Dodgers", lat: 34.0739, lon: -118.2400, stadium: "Dodger Stadium" },
-            padres: { name: "San Diego Padres", lat: 32.7073, lon: -117.1566, stadium: "Petco Park" },
-            giants: { name: "San Francisco Giants", lat: 37.7786, lon: -122.3893, stadium: "Oracle Park" }
+            diamondbacks: { name: "Arizona Diamondbacks", lat: 33.4453, lon: -112.0667, stadium: "Chase Field", indoor: true },
+            rockies: { name: "Colorado Rockies", lat: 39.7559, lon: -104.9942, stadium: "Coors Field", indoor: false },
+            dodgers: { name: "Los Angeles Dodgers", lat: 34.0739, lon: -118.2400, stadium: "Dodger Stadium", indoor: false },
+            padres: { name: "San Diego Padres", lat: 32.7073, lon: -117.1566, stadium: "Petco Park", indoor: false },
+            giants: { name: "San Francisco Giants", lat: 37.7786, lon: -122.3893, stadium: "Oracle Park", indoor: false }
         };
 
         // Set default date to today
@@ -502,7 +502,7 @@
             }
 
             // Analyze game status
-            const gameStatus = analyzeGameStatus(periods, gameDateTime);
+            const gameStatus = analyzeGameStatus(periods, gameDateTime, location.indoor);
             
             // Status icons and styling
             const statusConfig = {
@@ -592,9 +592,18 @@
             }
         });
 
-        function analyzeGameStatus(periods, gameDateTime) {
+        function analyzeGameStatus(periods, gameDateTime, isIndoorStadium) {
             if (!periods || periods.length === 0) {
                 return { status: 'unknown', message: 'Unable to determine game status - no weather data available', details: '' };
+            }
+
+            // Indoor stadiums are never cancelled due to weather
+            if (isIndoorStadium) {
+                return { 
+                    status: 'play', 
+                    message: 'Game will be played as scheduled', 
+                    details: 'Indoor stadium - weather does not affect gameplay. Check forecast for conditions outside the stadium.' 
+                };
             }
 
             let maxPrecipProb = 0;
@@ -637,7 +646,7 @@
                 }
             });
 
-            // Decision logic
+            // Decision logic for outdoor stadiums
             let status, message, details;
 
             // Automatic postponement conditions
