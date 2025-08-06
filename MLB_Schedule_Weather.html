@@ -683,26 +683,55 @@
                 const precipitation = period.probabilityOfPrecipitation ? 
                     `${period.probabilityOfPrecipitation.value || 0}%` : '0%';
                 
-                // Extract additional details from detailed forecast
+                // Extract cloud cover and precipitation info
+                const shortForecast = period.shortForecast.toLowerCase();
                 const detailedForecast = period.detailedForecast.toLowerCase();
                 let cloudCover = 'Unknown';
-                let precipAmount = '0"';
+                let precipAmount = '--';
                 
-                // Estimate cloud cover from short forecast
-                if (detailedForecast.includes('sunny') || detailedForecast.includes('clear')) {
+                // Determine cloud cover from shortForecast (more reliable than detailedForecast)
+                if (shortForecast.includes('sunny') || shortForecast.includes('clear')) {
                     cloudCover = 'Clear';
-                } else if (detailedForecast.includes('partly cloudy') || detailedForecast.includes('partly sunny')) {
+                } else if (shortForecast.includes('partly cloudy') || shortForecast.includes('partly sunny')) {
                     cloudCover = 'Partly Cloudy';
-                } else if (detailedForecast.includes('mostly cloudy')) {
-                    cloudCover = 'Mostly Cloudy';
-                } else if (detailedForecast.includes('cloudy') || detailedForecast.includes('overcast')) {
+                } else if (shortForecast.includes('mostly cloudy') || shortForecast.includes('mostly sunny')) {
+                    cloudCover = shortForecast.includes('mostly sunny') ? 'Mostly Sunny' : 'Mostly Cloudy';
+                } else if (shortForecast.includes('cloudy') || shortForecast.includes('overcast')) {
                     cloudCover = 'Cloudy';
+                } else if (shortForecast.includes('fog')) {
+                    cloudCover = 'Foggy';
+                } else {
+                    // Fallback: use the shortForecast itself if it's short enough
+                    if (period.shortForecast.length < 20) {
+                        cloudCover = period.shortForecast;
+                    }
                 }
 
-                // Try to extract precipitation amounts from detailed forecast
-                const precipMatch = detailedForecast.match(/(\d+\.?\d*)\s*(?:inch|in|")/);
-                if (precipMatch) {
-                    precipAmount = `${precipMatch[1]}"`;
+                // Extract precipitation amounts ONLY from NWS forecast text - no estimation
+                const precipMatches = [
+                    detailedForecast.match(/(\d+\.?\d*)\s*(?:to|-)?\s*(\d+\.?\d*)\s*(?:inch|in|inches|")/),
+                    detailedForecast.match(/(?:around|about|near)\s*(\d+\.?\d*)\s*(?:inch|in|inches|")/),
+                    detailedForecast.match(/(\d+\.?\d*)\s*(?:inch|in|inches|")/),
+                ];
+                
+                // Look for explicit precipitation amounts in the forecast text
+                for (const match of precipMatches) {
+                    if (match) {
+                        if (match[2] && match[1] !== match[2]) { 
+                            // Range like "0.5 to 1.0 inches"
+                            precipAmount = `${match[1]}-${match[2]}"`;
+                        } else {
+                            precipAmount = `${match[1]}"`;
+                        }
+                        break;
+                    }
+                }
+                
+                // Also check for common NWS terms that indicate trace amounts
+                if (precipAmount === '--' && (detailedForecast.includes('trace') || detailedForecast.includes('light'))) {
+                    if (detailedForecast.includes('trace')) {
+                        precipAmount = 'Trace';
+                    }
                 }
 
                 const rowClass = period.isGameTime ? 'game-time-row' : '';
