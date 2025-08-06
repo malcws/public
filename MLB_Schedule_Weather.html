@@ -236,6 +236,112 @@
             border-radius: 8px;
             text-align: center;
         }
+
+        .weather-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 10px;
+            border-left: 5px solid #17a2b8;
+        }
+
+        .weather-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #0c5460;
+        }
+
+        .weather-header .weather-icon {
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+
+        .weather-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .weather-table th {
+            background: #17a2b8;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .weather-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .weather-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .weather-table tr:hover {
+            background: #e8f4f8;
+        }
+
+        .game-time-row {
+            background: #fff3cd !important;
+            font-weight: 600;
+        }
+
+        .game-time-row td {
+            border-top: 2px solid #ffc107;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        .temp {
+            font-weight: 600;
+            color: #dc3545;
+        }
+
+        .precipitation {
+            color: #007bff;
+        }
+
+        .wind {
+            color: #28a745;
+        }
+
+        .weather-loading {
+            text-align: center;
+            padding: 20px;
+            color: #0c5460;
+            font-style: italic;
+        }
+
+        .weather-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .weather-table {
+                font-size: 0.8em;
+            }
+            
+            .weather-table th,
+            .weather-table td {
+                padding: 8px 4px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -267,38 +373,38 @@
     </div>
 
     <script>
-        // MLB Teams data with proper team IDs
+        // MLB Teams data with proper team IDs and stadium coordinates
         const mlbTeams = [
-            { id: 109, name: "Arizona Diamondbacks", abbreviation: "ARI" },
-            { id: 144, name: "Atlanta Braves", abbreviation: "ATL" },
-            { id: 110, name: "Baltimore Orioles", abbreviation: "BAL" },
-            { id: 111, name: "Boston Red Sox", abbreviation: "BOS" },
-            { id: 112, name: "Chicago Cubs", abbreviation: "CHC" },
-            { id: 145, name: "Chicago White Sox", abbreviation: "CWS" },
-            { id: 113, name: "Cincinnati Reds", abbreviation: "CIN" },
-            { id: 114, name: "Cleveland Guardians", abbreviation: "CLE" },
-            { id: 115, name: "Colorado Rockies", abbreviation: "COL" },
-            { id: 116, name: "Detroit Tigers", abbreviation: "DET" },
-            { id: 117, name: "Houston Astros", abbreviation: "HOU" },
-            { id: 118, name: "Kansas City Royals", abbreviation: "KC" },
-            { id: 108, name: "Los Angeles Angels", abbreviation: "LAA" },
-            { id: 119, name: "Los Angeles Dodgers", abbreviation: "LAD" },
-            { id: 146, name: "Miami Marlins", abbreviation: "MIA" },
-            { id: 158, name: "Milwaukee Brewers", abbreviation: "MIL" },
-            { id: 142, name: "Minnesota Twins", abbreviation: "MIN" },
-            { id: 121, name: "New York Mets", abbreviation: "NYM" },
-            { id: 147, name: "New York Yankees", abbreviation: "NYY" },
-            { id: 133, name: "Oakland Athletics", abbreviation: "OAK" },
-            { id: 143, name: "Philadelphia Phillies", abbreviation: "PHI" },
-            { id: 134, name: "Pittsburgh Pirates", abbreviation: "PIT" },
-            { id: 135, name: "San Diego Padres", abbreviation: "SD" },
-            { id: 137, name: "San Francisco Giants", abbreviation: "SF" },
-            { id: 136, name: "Seattle Mariners", abbreviation: "SEA" },
-            { id: 138, name: "St. Louis Cardinals", abbreviation: "STL" },
-            { id: 139, name: "Tampa Bay Rays", abbreviation: "TB" },
-            { id: 140, name: "Texas Rangers", abbreviation: "TEX" },
-            { id: 141, name: "Toronto Blue Jays", abbreviation: "TOR" },
-            { id: 120, name: "Washington Nationals", abbreviation: "WSH" }
+            { id: 109, name: "Arizona Diamondbacks", abbreviation: "ARI", lat: 33.4453, lon: -112.0667 },
+            { id: 144, name: "Atlanta Braves", abbreviation: "ATL", lat: 33.8906, lon: -84.4677 },
+            { id: 110, name: "Baltimore Orioles", abbreviation: "BAL", lat: 39.2840, lon: -76.6218 },
+            { id: 111, name: "Boston Red Sox", abbreviation: "BOS", lat: 42.3467, lon: -71.0972 },
+            { id: 112, name: "Chicago Cubs", abbreviation: "CHC", lat: 41.9484, lon: -87.6553 },
+            { id: 145, name: "Chicago White Sox", abbreviation: "CWS", lat: 41.8299, lon: -87.6338 },
+            { id: 113, name: "Cincinnati Reds", abbreviation: "CIN", lat: 39.0974, lon: -84.5063 },
+            { id: 114, name: "Cleveland Guardians", abbreviation: "CLE", lat: 41.4962, lon: -81.6852 },
+            { id: 115, name: "Colorado Rockies", abbreviation: "COL", lat: 39.7559, lon: -104.9942 },
+            { id: 116, name: "Detroit Tigers", abbreviation: "DET", lat: 42.3390, lon: -83.0485 },
+            { id: 117, name: "Houston Astros", abbreviation: "HOU", lat: 25.7959, lon: -95.3633 },
+            { id: 118, name: "Kansas City Royals", abbreviation: "KC", lat: 39.0517, lon: -94.4803 },
+            { id: 108, name: "Los Angeles Angels", abbreviation: "LAA", lat: 33.8003, lon: -117.8827 },
+            { id: 119, name: "Los Angeles Dodgers", abbreviation: "LAD", lat: 34.0739, lon: -118.2400 },
+            { id: 146, name: "Miami Marlins", abbreviation: "MIA", lat: 25.7781, lon: -80.2197 },
+            { id: 158, name: "Milwaukee Brewers", abbreviation: "MIL", lat: 43.0280, lon: -87.9712 },
+            { id: 142, name: "Minnesota Twins", abbreviation: "MIN", lat: 44.9817, lon: -93.2777 },
+            { id: 121, name: "New York Mets", abbreviation: "NYM", lat: 40.7571, lon: -73.8458 },
+            { id: 147, name: "New York Yankees", abbreviation: "NYY", lat: 40.8296, lon: -73.9262 },
+            { id: 133, name: "Oakland Athletics", abbreviation: "OAK", lat: 37.7516, lon: -122.2005 },
+            { id: 143, name: "Philadelphia Phillies", abbreviation: "PHI", lat: 39.9061, lon: -75.1665 },
+            { id: 134, name: "Pittsburgh Pirates", abbreviation: "PIT", lat: 40.4469, lon: -80.0057 },
+            { id: 135, name: "San Diego Padres", abbreviation: "SD", lat: 32.7073, lon: -117.1566 },
+            { id: 137, name: "San Francisco Giants", abbreviation: "SF", lat: 37.7786, lon: -122.3893 },
+            { id: 136, name: "Seattle Mariners", abbreviation: "SEA", lat: 47.5914, lon: -122.3326 },
+            { id: 138, name: "St. Louis Cardinals", abbreviation: "STL", lat: 38.6226, lon: -90.1928 },
+            { id: 139, name: "Tampa Bay Rays", abbreviation: "TB", lat: 27.7682, lon: -82.6534 },
+            { id: 140, name: "Texas Rangers", abbreviation: "TEX", lat: 32.7473, lon: -97.0834 },
+            { id: 141, name: "Toronto Blue Jays", abbreviation: "TOR", lat: 43.6414, lon: -79.3894 },
+            { id: 120, name: "Washington Nationals", abbreviation: "WSH", lat: 38.8730, lon: -77.0074 }
         ];
 
         // Initialize the app
@@ -469,8 +575,170 @@
                         <div class="venue">
                             <div class="venue-name">🏟️ ${venue}</div>
                         </div>
+
+                        <div class="weather-section" id="weatherSection">
+                            <div class="weather-header">
+                                <span class="weather-icon">🌤️</span>
+                                Weather Forecast
+                            </div>
+                            <div class="weather-loading">Loading weather forecast...</div>
+                        </div>
                     </div>
                 </div>
+            `;
+
+            // Load weather forecast
+            loadWeatherForecast(homeTeam.id, gameTime);
+        }
+
+        async function loadWeatherForecast(homeTeamId, gameTime) {
+            const weatherSection = document.getElementById('weatherSection');
+            const homeTeamData = mlbTeams.find(team => team.id == homeTeamId);
+            
+            if (!homeTeamData) {
+                weatherSection.innerHTML = `
+                    <div class="weather-header">
+                        <span class="weather-icon">🌤️</span>
+                        Weather Forecast
+                    </div>
+                    <div class="weather-error">Unable to load weather data: Team location not found</div>
+                `;
+                return;
+            }
+
+            try {
+                // Get NWS forecast office and grid coordinates
+                const pointsUrl = `https://api.weather.gov/points/${homeTeamData.lat},${homeTeamData.lon}`;
+                const pointsResponse = await fetch(pointsUrl);
+                
+                if (!pointsResponse.ok) {
+                    throw new Error('Failed to get weather grid information');
+                }
+
+                const pointsData = await pointsResponse.json();
+                const forecastHourlyUrl = pointsData.properties.forecastHourly;
+
+                // Get hourly forecast
+                const forecastResponse = await fetch(forecastHourlyUrl);
+                
+                if (!forecastResponse.ok) {
+                    throw new Error('Failed to get hourly forecast');
+                }
+
+                const forecastData = await forecastResponse.json();
+                displayWeatherForecast(forecastData, gameTime);
+
+            } catch (error) {
+                console.error('Weather API error:', error);
+                weatherSection.innerHTML = `
+                    <div class="weather-header">
+                        <span class="weather-icon">🌤️</span>
+                        Weather Forecast
+                    </div>
+                    <div class="weather-error">Unable to load weather forecast: ${error.message}</div>
+                `;
+            }
+        }
+
+        function displayWeatherForecast(forecastData, gameTime) {
+            const weatherSection = document.getElementById('weatherSection');
+            
+            // Find the forecast periods around game time (1 hour before to 4 hours after)
+            const gameHour = new Date(gameTime);
+            const startTime = new Date(gameHour.getTime() - (60 * 60 * 1000)); // 1 hour before
+            const periods = [];
+
+            // Get 5 periods: 1 hour before game time + 4 hours after
+            for (let i = 0; i < forecastData.properties.periods.length && periods.length < 5; i++) {
+                const period = forecastData.properties.periods[i];
+                const periodTime = new Date(period.startTime);
+                
+                if (periodTime >= startTime) {
+                    periods.push({
+                        ...period,
+                        periodTime: periodTime,
+                        isGameTime: Math.abs(periodTime.getTime() - gameTime.getTime()) < (30 * 60 * 1000) // Within 30 minutes of game time
+                    });
+                }
+            }
+
+            if (periods.length === 0) {
+                weatherSection.innerHTML = `
+                    <div class="weather-header">
+                        <span class="weather-icon">🌤️</span>
+                        Weather Forecast
+                    </div>
+                    <div class="weather-error">No weather data available for game time</div>
+                `;
+                return;
+            }
+
+            const tableRows = periods.map(period => {
+                const time = period.periodTime.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+                const temp = `${period.temperature}°F`;
+                const wind = `${period.windSpeed} ${period.windDirection}`;
+                const precipitation = period.probabilityOfPrecipitation ? 
+                    `${period.probabilityOfPrecipitation.value || 0}%` : '0%';
+                
+                // Extract additional details from detailed forecast
+                const detailedForecast = period.detailedForecast.toLowerCase();
+                let cloudCover = 'Unknown';
+                let precipAmount = '0"';
+                
+                // Estimate cloud cover from short forecast
+                if (detailedForecast.includes('sunny') || detailedForecast.includes('clear')) {
+                    cloudCover = 'Clear';
+                } else if (detailedForecast.includes('partly cloudy') || detailedForecast.includes('partly sunny')) {
+                    cloudCover = 'Partly Cloudy';
+                } else if (detailedForecast.includes('mostly cloudy')) {
+                    cloudCover = 'Mostly Cloudy';
+                } else if (detailedForecast.includes('cloudy') || detailedForecast.includes('overcast')) {
+                    cloudCover = 'Cloudy';
+                }
+
+                // Try to extract precipitation amounts from detailed forecast
+                const precipMatch = detailedForecast.match(/(\d+\.?\d*)\s*(?:inch|in|")/);
+                if (precipMatch) {
+                    precipAmount = `${precipMatch[1]}"`;
+                }
+
+                const rowClass = period.isGameTime ? 'game-time-row' : '';
+                
+                return `
+                    <tr class="${rowClass}">
+                        <td>${time}</td>
+                        <td class="temp">${temp}</td>
+                        <td>${cloudCover}</td>
+                        <td class="precipitation">${precipitation}</td>
+                        <td class="precipitation">${precipAmount}</td>
+                        <td class="wind">${wind}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            weatherSection.innerHTML = `
+                <div class="weather-header">
+                    <span class="weather-icon">🌤️</span>
+                    Weather Forecast
+                </div>
+                <table class="weather-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Temp</th>
+                            <th>Sky</th>
+                            <th>Rain %</th>
+                            <th>Amount</th>
+                            <th>Wind</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
             `;
         }
 
