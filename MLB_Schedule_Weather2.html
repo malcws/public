@@ -728,11 +728,11 @@
                 gameHtml += `
                     <tr class="${rowClass}">
                         <td class="time-cell">${timeLabel}</td>
-                        <td>🌡️ ${hour.temp}°F</td>
+                        <td>${hour.temp}°F</td>
                         <td>${hour.condition}</td>
-                        <td>🌪️ ${hour.windSpeed} mph</td>
-                        ${hour.humidity ? `<td>💧 ${hour.humidity}%</td>` : ''}
-                        <td>${hour.precipitation > 20 ? `🌧️ ${Math.round(hour.precipitation)}%` : '☀️ ${Math.round(hour.precipitation)}%'}</td>
+                        <td>${hour.windSpeed} mph</td>
+                        ${hour.humidity ? `<td>${hour.humidity}%</td>` : ''}
+                        <td>${hour.precipitation > 20 ? `${Math.round(hour.precipitation)}%` : `${Math.round(hour.precipitation)}%`}</td>
                     </tr>
                 `;
             });
