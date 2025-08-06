@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB Game Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #2d5aa0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c41e3a, #003087);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #003087;
+            box-shadow: 0 0 0 3px rgba(0, 48, 135, 0.1);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #c41e3a, #003087);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(196, 30, 58, 0.3);
+        }
+
+        .search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #003087;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .game-result {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #003087;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-date {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .game-time {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #003087;
+        }
+
+        .matchup {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .team {
+            text-align: center;
+            flex: 1;
+        }
+
+        .team-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .team-record {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .vs {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #c41e3a;
+            margin: 0 20px;
+        }
+
+        .venue {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .venue-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #003087;
+        }
+
+        .home-indicator {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .no-game {
+            text-align: center;
+            padding: 40px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            color: #856404;
+        }
+
+        .no-game h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚾ MLB Game Schedule</h1>
+            <p>Find scheduled games for your favorite team</p>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="dateSelect">Select Date:</label>
+                <select id="dateSelect">
+                    <option value="">Choose a date...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="teamSelect">Select Team:</label>
+                <select id="teamSelect">
+                    <option value="">Choose a team...</option>
+                </select>
+            </div>
+
+            <button id="searchBtn" class="search-btn" disabled>Find Game</button>
+
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // MLB Teams data with proper team IDs
+        const mlbTeams = [
+            { id: 109, name: "Arizona Diamondbacks", abbreviation: "ARI" },
+            { id: 144, name: "Atlanta Braves", abbreviation: "ATL" },
+            { id: 110, name: "Baltimore Orioles", abbreviation: "BAL" },
+            { id: 111, name: "Boston Red Sox", abbreviation: "BOS" },
+            { id: 112, name: "Chicago Cubs", abbreviation: "CHC" },
+            { id: 145, name: "Chicago White Sox", abbreviation: "CWS" },
+            { id: 113, name: "Cincinnati Reds", abbreviation: "CIN" },
+            { id: 114, name: "Cleveland Guardians", abbreviation: "CLE" },
+            { id: 115, name: "Colorado Rockies", abbreviation: "COL" },
+            { id: 116, name: "Detroit Tigers", abbreviation: "DET" },
+            { id: 117, name: "Houston Astros", abbreviation: "HOU" },
+            { id: 118, name: "Kansas City Royals", abbreviation: "KC" },
+            { id: 108, name: "Los Angeles Angels", abbreviation: "LAA" },
+            { id: 119, name: "Los Angeles Dodgers", abbreviation: "LAD" },
+            { id: 146, name: "Miami Marlins", abbreviation: "MIA" },
+            { id: 158, name: "Milwaukee Brewers", abbreviation: "MIL" },
+            { id: 142, name: "Minnesota Twins", abbreviation: "MIN" },
+            { id: 121, name: "New York Mets", abbreviation: "NYM" },
+            { id: 147, name: "New York Yankees", abbreviation: "NYY" },
+            { id: 133, name: "Oakland Athletics", abbreviation: "OAK" },
+            { id: 143, name: "Philadelphia Phillies", abbreviation: "PHI" },
+            { id: 134, name: "Pittsburgh Pirates", abbreviation: "PIT" },
+            { id: 135, name: "San Diego Padres", abbreviation: "SD" },
+            { id: 137, name: "San Francisco Giants", abbreviation: "SF" },
+            { id: 136, name: "Seattle Mariners", abbreviation: "SEA" },
+            { id: 138, name: "St. Louis Cardinals", abbreviation: "STL" },
+            { id: 139, name: "Tampa Bay Rays", abbreviation: "TB" },
+            { id: 140, name: "Texas Rangers", abbreviation: "TEX" },
+            { id: 141, name: "Toronto Blue Jays", abbreviation: "TOR" },
+            { id: 120, name: "Washington Nationals", abbreviation: "WSH" }
+        ];
+
+        // Initialize the app
+        function init() {
+            populateDates();
+            populateTeams();
+            setupEventListeners();
+        }
+
+        function populateDates() {
+            const dateSelect = document.getElementById('dateSelect');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const todayOption = document.createElement('option');
+            todayOption.value = formatDate(today);
+            todayOption.textContent = `Today (${formatDateDisplay(today)})`;
+            dateSelect.appendChild(todayOption);
+
+            const tomorrowOption = document.createElement('option');
+            tomorrowOption.value = formatDate(tomorrow);
+            tomorrowOption.textContent = `Tomorrow (${formatDateDisplay(tomorrow)})`;
+            dateSelect.appendChild(tomorrowOption);
+        }
+
+        function populateTeams() {
+            const teamSelect = document.getElementById('teamSelect');
+            
+            // Sort teams alphabetically by name
+            const sortedTeams = [...mlbTeams].sort((a, b) => a.name.localeCompare(b.name));
+            
+            sortedTeams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.id;
+                option.textContent = team.name;
+                teamSelect.appendChild(option);
+            });
+        }
+
+        function setupEventListeners() {
+            const dateSelect = document.getElementById('dateSelect');
+            const teamSelect = document.getElementById('teamSelect');
+            const searchBtn = document.getElementById('searchBtn');
+
+            function checkFormValidity() {
+                const isValid = dateSelect.value && teamSelect.value;
+                searchBtn.disabled = !isValid;
+            }
+
+            dateSelect.addEventListener('change', checkFormValidity);
+            teamSelect.addEventListener('change', checkFormValidity);
+            searchBtn.addEventListener('click', searchGame);
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateDisplay(date) {
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        async function searchGame() {
+            const dateSelect = document.getElementById('dateSelect');
+            const teamSelect = document.getElementById('teamSelect');
+            const results = document.getElementById('results');
+            const searchBtn = document.getElementById('searchBtn');
+
+            const selectedDate = dateSelect.value;
+            const selectedTeamId = teamSelect.value;
+
+            if (!selectedDate || !selectedTeamId) return;
+
+            // Show loading state
+            searchBtn.disabled = true;
+            results.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading game schedule...
+                </div>
+            `;
+
+            try {
+                const apiUrl = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${selectedDate}&teamId=${selectedTeamId}&hydrate=team,linescore`;
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data, selectedDate, selectedTeamId);
+
+            } catch (error) {
+                console.error('Error fetching game data:', error);
+                results.innerHTML = `
+                    <div class="error">
+                        <h3>Error Loading Game Data</h3>
+                        <p>Unable to fetch game information. Please try again later.</p>
+                        <p><small>Error: ${error.message}</small></p>
+                    </div>
+                `;
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data, selectedDate, selectedTeamId) {
+            const results = document.getElementById('results');
+            const selectedTeam = mlbTeams.find(team => team.id == selectedTeamId);
+            
+            if (!data.dates || data.dates.length === 0 || !data.dates[0].games || data.dates[0].games.length === 0) {
+                results.innerHTML = `
+                    <div class="game-result">
+                        <div class="no-game">
+                            <h3>No Game Scheduled</h3>
+                            <p><strong>${selectedTeam.name}</strong> has no scheduled game on ${formatDateDisplay(new Date(selectedDate))}.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const game = data.dates[0].games[0];
+            const homeTeam = game.teams.home.team;
+            const awayTeam = game.teams.away.team;
+            const gameTime = new Date(game.gameDate);
+            const venue = game.venue.name;
+
+            const isHomeGame = homeTeam.id == selectedTeamId;
+
+            results.innerHTML = `
+                <div class="game-result">
+                    <div class="game-card">
+                        <div class="game-header">
+                            <div class="game-date">${formatDateDisplay(new Date(selectedDate))}</div>
+                            <div class="game-time">${gameTime.toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit',
+                                timeZoneName: 'short'
+                            })}</div>
+                        </div>
+
+                        <div class="matchup">
+                            <div class="team">
+                                <div class="team-name">${awayTeam.name}</div>
+                                <div class="team-record">${awayTeam.abbreviation}</div>
+                                ${awayTeam.id == selectedTeamId && !isHomeGame ? '<div class="home-indicator">AWAY</div>' : ''}
+                            </div>
+                            
+                            <div class="vs">@</div>
+                            
+                            <div class="team">
+                                <div class="team-name">${homeTeam.name}</div>
+                                <div class="team-record">${homeTeam.abbreviation}</div>
+                                ${homeTeam.id == selectedTeamId && isHomeGame ? '<div class="home-indicator">HOME</div>' : ''}
+                            </div>
+                        </div>
+
+                        <div class="venue">
+                            <div class="venue-name">🏟️ ${venue}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the app when the page loads
+        init();
+    </script>
+</body>
+</html>
