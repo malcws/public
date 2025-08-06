@@ -166,18 +166,37 @@
             margin-bottom: 20px;
         }
 
-        .weather-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        .weather-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
 
-        .weather-hour {
-            background: rgba(255,255,255,0.15);
-            padding: 15px;
-            border-radius: 10px;
+        .weather-table th {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 10px;
             text-align: center;
-            backdrop-filter: blur(10px);
+            font-weight: bold;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .weather-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .weather-table .game-time-row {
+            background: rgba(255,255,255,0.15);
+            font-weight: bold;
+        }
+
+        .weather-table .time-cell {
+            font-weight: bold;
+            min-width: 80px;
         }
 
         .prediction-section {
@@ -436,6 +455,19 @@
             return teamIds[abbrev] || 109;
         }
 
+        // Indoor/Domed stadiums that are not affected by weather
+        const indoorStadiums = new Set([
+            'Tropicana Field',           // Tampa Bay Rays
+            'Rogers Centre',             // Toronto Blue Jays  
+            'Minute Maid Park',          // Houston Astros (retractable roof)
+            'Globe Life Field',          // Texas Rangers
+            'Marlins Park',              // Miami Marlins
+            'loanDepot park',            // Miami Marlins (alternate name)
+            'Chase Field',               // Arizona Diamondbacks (retractable roof)
+            'T-Mobile Park',             // Seattle Mariners (retractable roof)
+            'American Family Field'      // Milwaukee Brewers (retractable roof)
+        ]);
+
         // Stadium coordinates for NWS weather data
         const stadiumCoordinates = {
             'Chase Field': { lat: 33.4453, lon: -112.0667 },
@@ -665,36 +697,54 @@
             `;
 
             // Weather section
+            const isIndoorStadium = indoorStadiums.has(venue);
+            
             gameHtml += `
                 <div class="weather-section">
                     <div class="weather-header">
                         <h2>🌤️ Weather Forecast</h2>
                         <p>Conditions from 1 hour before game time through 3 hours after</p>
+                        ${isIndoorStadium ? '<p><strong>🏠 Indoor/Domed Stadium - Weather has minimal impact on gameplay</strong></p>' : ''}
                     </div>
-                    <div class="weather-grid">
+                    <table class="weather-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Temp</th>
+                                <th>Conditions</th>
+                                <th>Wind</th>
+                                ${weatherData.hourlyForecast[0].humidity ? '<th>Humidity</th>' : ''}
+                                <th>Rain Chance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
 
             weatherData.hourlyForecast.forEach((hour, index) => {
-                const timeLabel = index === 1 ? 'Game Time' : hour.time;
+                const isGameTime = index === 1;
+                const timeLabel = isGameTime ? 'Game Time' : hour.time;
+                const rowClass = isGameTime ? 'game-time-row' : '';
+                
                 gameHtml += `
-                    <div class="weather-hour ${index === 1 ? 'game-time-weather' : ''}">
-                        <div style="font-weight: bold; margin-bottom: 10px;">${timeLabel}</div>
-                        <div>🌡️ ${hour.temp}°F</div>
-                        <div>☁️ ${hour.condition}</div>
-                        ${hour.humidity ? `<div>💧 ${hour.humidity}% humidity</div>` : ''}
-                        <div>🌪️ ${hour.windSpeed} mph wind</div>
-                        ${hour.precipitation > 20 ? `<div>🌧️ ${Math.round(hour.precipitation)}% rain chance</div>` : ''}
-                    </div>
+                    <tr class="${rowClass}">
+                        <td class="time-cell">${timeLabel}</td>
+                        <td>🌡️ ${hour.temp}°F</td>
+                        <td>${hour.condition}</td>
+                        <td>🌪️ ${hour.windSpeed} mph</td>
+                        ${hour.humidity ? `<td>💧 ${hour.humidity}%</td>` : ''}
+                        <td>${hour.precipitation > 20 ? `🌧️ ${Math.round(hour.precipitation)}%` : '☀️ ${Math.round(hour.precipitation)}%'}</td>
+                    </tr>
                 `;
             });
 
             gameHtml += `
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             `;
 
             // Game prediction
-            const prediction = predictGameStatus(weatherData);
+            const prediction = predictGameStatus(weatherData, isIndoorStadium);
             gameHtml += `
                 <div class="prediction-section">
                     <h2>🎯 Game Status Prediction</h2>
@@ -706,13 +756,35 @@
             gameResults.innerHTML = gameHtml;
         }
 
-        function predictGameStatus(weatherData) {
+        function predictGameStatus(weatherData, isIndoorStadium) {
+            // Indoor stadiums are not affected by weather (except extreme circumstances)
+            if (isIndoorStadium) {
+                const gameTimeWeather = weatherData.hourlyForecast[1];
+                
+                // Even indoor stadiums can be affected by extreme weather (power outages, flooding, etc.)
+                if (gameTimeWeather.condition.toLowerCase().includes('tornado') ||
+                    gameTimeWeather.condition.toLowerCase().includes('hurricane') ||
+                    gameTimeWeather.condition.toLowerCase().includes('severe thunderstorm')) {
+                    return {
+                        status: "⚠️ Monitor Conditions",
+                        reason: "Indoor stadium provides protection, but severe weather may affect transportation and fan safety."
+                    };
+                }
+                
+                return {
+                    status: "✅ Game On - Indoor Stadium",
+                    reason: "Indoor/domed stadium provides complete protection from weather conditions."
+                };
+            }
+            
+            // Outdoor stadium weather analysis
             const gameTimeWeather = weatherData.hourlyForecast[1]; // Game time is index 1
             const postGameWeather = weatherData.hourlyForecast.slice(2); // Hours after game
             
             // Check for severe weather
             if (gameTimeWeather.condition.toLowerCase().includes('thunderstorm') || 
-                gameTimeWeather.condition.toLowerCase().includes('lightning')) {
+                gameTimeWeather.condition.toLowerCase().includes('lightning') ||
+                gameTimeWeather.condition.toLowerCase().includes('tornado')) {
                 return {
                     status: "⛈️ Likely Postponed",
                     reason: "Thunderstorms present safety concerns and typically result in postponement."
@@ -721,7 +793,8 @@
             
             // Check for heavy rain
             if (gameTimeWeather.precipitation > 70 || 
-                gameTimeWeather.condition.toLowerCase().includes('heavy rain')) {
+                gameTimeWeather.condition.toLowerCase().includes('heavy rain') ||
+                gameTimeWeather.condition.toLowerCase().includes('downpour')) {
                 return {
                     status: "🌧️ Likely Delayed",
                     reason: "Heavy rain conditions typically cause delays until weather clears."
@@ -752,11 +825,26 @@
                 };
             }
             
+            if (gameTimeWeather.temp > 100) {
+                return {
+                    status: "🥵 Monitor Heat Conditions",
+                    reason: "Extreme heat may require additional player safety measures or delays."
+                };
+            }
+            
             // Check for high winds
             if (gameTimeWeather.windSpeed > 25) {
                 return {
-                    status: "💨 Monitor Weather Conditions",
+                    status: "💨 Monitor Wind Conditions",
                     reason: "High winds may affect gameplay but unlikely to postpone unless severe."
+                };
+            }
+            
+            // Light rain check
+            if (gameTimeWeather.precipitation > 20 && gameTimeWeather.precipitation <= 40) {
+                return {
+                    status: "🌦️ Possible Brief Delay",
+                    reason: "Light rain may cause brief delays but game likely to be played."
                 };
             }
             
